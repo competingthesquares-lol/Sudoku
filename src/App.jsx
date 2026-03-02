@@ -1,87 +1,88 @@
-import { useState, useRef, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react';
+import './App.css';
 
-function Module({ text, rowIndex, colIndex, handleClick, hover, color}) {
-  const colorStyles = {
-    backgroundColor: `${color}`,
-  };
+function Module({ text, handleClick, handleHover, color }) {
   return (
-    <div className="box" onClick={() => handleClick()} onMouseOver={() => hover()} style={colorStyles}>
+    <div 
+      className="box" 
+      onClick={handleClick} 
+      onMouseEnter={handleHover} 
+      style={{ backgroundColor: color }}
+    >
       <p>{text}</p>
     </div>
   );
 }
 
-function Row({ rowData, rowIndex, handleClick, hover, color}) {
-  // Use the data passed down from the Board
-  const renderTableColumns = (row) => {
-    return row.map((item, colIndex) => {
-      // Use backticks for template literals
-      return <Module key={`cell-${rowIndex}-${colIndex}`} text={item} rowIndex={rowIndex} colIndex={colIndex} handleClick={() => handleClick(colIndex)} hover={() => hover(colIndex)} color={color[colIndex]}/>;
-    });
-  };
-
-  return <div className="component">{renderTableColumns(rowData)}</div>;
-}
-
 export default function Board() {
-  const initialize2DArray = (rows, cols, value) => {
-    return Array.from({ length: rows }, () => Array(cols).fill(value));
-  };
-  const defaultGrid = initialize2DArray(9, 9, "");
-  const defaultColor = initialize2DArray(9, 9, "black");
-  const [color, setColor] = useState(defaultColor);
-  const [temp, setTemp] = useState(defaultColor);
-  function changeColor(row, col, color1, color2) {
-    const newColor = defaultColor.map(row => [...row]); 
-    for (let i = 0; i < 9; i++){
-      newColor[i][col] = color1;
+  const [grid] = useState(Array(9).fill("").map(() => Array(9).fill("")));
+  const [selected, setSelected] = useState(null); // {r, c}
+  const [hovered, setHovered] = useState(null);   // {r, c}
+  const [lastKeyPressed, setLastKeyPressed] = useState('None yet');
+  
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const { r, c } = selected;
+
+      // 1. Handle Navigation (Arrow Keys)
+      if (event.key === 'ArrowUp')    setSelected({ r: Math.max(0, r - 1), c });
+      if (event.key === 'ArrowDown')  setSelected({ r: Math.min(8, r + 1), c });
+      if (event.key === 'ArrowLeft')  setSelected({ r, c: Math.max(0, c - 1) });
+      if (event.key === 'ArrowRight') setSelected({ r, c: Math.min(8, c + 1) });
+
+      // 2. Handle Data Entry (Numbers 1-9)
+      if (/^[1-9]$/.test(event.key)) {
+        const newGrid = grid.map((row, rIdx) => 
+          row.map((cell, cIdx) => (rIdx === r && cIdx === c ? event.key : cell))
+        );
+        setGrid(newGrid);
+      }
+
+      // 3. Handle Deletion (Backspace/Delete)
+      if (event.key === 'Backspace' || event.key === 'Delete') {
+        const newGrid = grid.map((row, rIdx) => 
+          row.map((cell, cIdx) => (rIdx === r && cIdx === c ? "" : cell))
+        );
+        setGrid(newGrid);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selected, grid]);
+
+  const getCellColor = (r, c) => {
+
+    // 1. Check for Hover (Temporary) - Overrides selection visual if you prefer
+    if (hovered) {
+      if (r === hovered.r && c === hovered.c) return "purple";
+      if (r === hovered.r || c === hovered.c) return "green";
     }
-    for (let j = 0; j < 9; j++){
-      newColor[row][j] = color1;
+
+    // 2. Check for Selection (Persistent)
+    if (selected) {
+      if (r === selected.r && c === selected.c) return "lightgreen";
+      if (r === selected.r || c === selected.c) return "LightBlue";
     }
-    newColor[row][col] = color2;
-    setColor(newColor);
-  };
-  function hoverColor(row, col, color1, color2) {
-    const tempColor = color.map(row => [...row]); 
-    for (let i = 0; i < 9; i++){
-      tempColor[i][col] = color1;
-    }
-    for (let j = 0; j < 9; j++){
-      tempColor[row][j] = color1;
-    }
-    tempColor[row][col] = color2;
-    setTemp(tempColor);
-  };
-  // Note: In a real app, you'd likely wrap this in useState 
-  // if the grid is meant to change over time.
-  const [grid, setGrid] = useState(defaultGrid);
-  const [selected, setSelected] = useState([0, 0]);
-  function handleClick(row, col) {
-    setSelected([row, col]);
-    changeColor(row, col, "LightBlue", "lightgreen");
-  };
-  function hover(row, col) {
-    setSelected([row, col]);
-    changeColor(row, col, "green", "purple");
-  };
-  const renderTableRows = (data) => {
-    return data.map((rowItem, index) => {
-      return (
-        <Row 
-          key={`row-${index}`} 
-          rowData={rowItem} 
-          rowIndex={index} 
-          handleClick={(col) => handleClick(index, col)}
-          hover={(col) => hover(index, col)}
-          color = {temp[index]}
-        />
-      );
-    });
+
+    return "white"; // Default background
   };
 
-  return <div className="board-container">{renderTableRows(grid)}</div>;
+  return (
+    <div className="board-container" onMouseLeave={() => setHovered(null)}>
+      {grid.map((row, rIndex) => (
+        <div key={`row-${rIndex}`} className="component">
+          {row.map((cell, cIndex) => (
+            <Module
+              key={`${rIndex}-${cIndex}`}
+              text={cell}
+              color={getCellColor(rIndex, cIndex)}
+              handleClick={() => setSelected({ r: rIndex, c: cIndex })}
+              handleHover={() => setHovered({ r: rIndex, c: cIndex })}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
 }
