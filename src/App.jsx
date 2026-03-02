@@ -10,22 +10,22 @@ return (
 </div>);
 }
 function Row( {text, rowIndex} ) {
-const ModuleComponent = [];
-for (let count = 0; count < 5; count++){
-
-ModuleComponent.push(<Module text = {text[count]}/>);
-}
-return <div className = "component">{ModuleComponent}</div>;
-return <Game/>;
+const renderTableColumns = (chunk) => {
+return chunk.map((item, index) => {
+return (<Module key={'col-${index}'} text={item}/>);
+});
+};
+return (<div className = "component"> {renderTableColumns(item)} </div>);
 }
 export default function Board() {
 const initialize2DArray = (rows, cols) => {
   return Array.from({ length: rows }, () => Array(cols).fill(0));
 };
-const board = initializeArray(9, 9);
-const renderTableRows = (dataArray) => {
-return dataArray.map((rowItem, index) => {
-return <Row key={rowItem.id} item={rowItem} rowIndex={index} />;
+const Grid = initialize2DArray(9, 9);
+const renderTableRows = (data) => {
+return data.map((rowItem, index) => {
+return (<Row key={'row-${index}'} text={rowItem} rowIndex={index} /> );
 });
 };
+return <div className="board-container"> {renderTableRows(Grid)} </div>;
 }
