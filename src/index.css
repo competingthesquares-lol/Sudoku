@@ -54,7 +54,7 @@ body {
   vertical-align: middle;
   font-family: san-serif;
   font-size: 30px;
-  color: white;
+  color: black;
 }
 .box:hover{
   background-color: blue;
@@ -68,12 +68,14 @@ button {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
-  font-size: 1em;
+  font-size: 80px;
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  min-width: 450px;
+  min-height: 150px;
 }
 button:hover {
   border-color: #646cff;

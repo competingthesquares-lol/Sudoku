@@ -14,8 +14,7 @@ function Module({ text, handleClick, handleHover, color }) {
   );
 }
 
-export default function Board() {
-  const [grid] = useState(Array(9).fill("").map(() => Array(9).fill("")));
+function Board({grid, setGrid}) {
   const [selected, setSelected] = useState(null); // {r, c}
   const [hovered, setHovered] = useState(null);   // {r, c}
   const [lastKeyPressed, setLastKeyPressed] = useState('None yet');
@@ -31,7 +30,7 @@ export default function Board() {
       if (event.key === 'ArrowRight') setSelected({ r, c: Math.min(8, c + 1) });
 
       // 2. Handle Data Entry (Numbers 1-9)
-      if (/^[1-9]$/.test(event.key)) {
+      if (event.key >= 1 && event.key <= 9) {
         const newGrid = grid.map((row, rIdx) => 
           row.map((cell, cIdx) => (rIdx === r && cIdx === c ? event.key : cell))
         );
@@ -55,8 +54,8 @@ export default function Board() {
 
     // 1. Check for Hover (Temporary) - Overrides selection visual if you prefer
     if (hovered) {
-      if (r === hovered.r && c === hovered.c) return "purple";
-      if (r === hovered.r || c === hovered.c) return "green";
+      if (r === hovered.r && c === hovered.c) return "white";
+      if (r === hovered.r || c === hovered.c) return "lightskyblue";
     }
 
     // 2. Check for Selection (Persistent)
@@ -83,6 +82,18 @@ export default function Board() {
           ))}
         </div>
       ))}
+    </div>
+  );
+}
+
+export default function All() {
+  const [grid, setGrid] = useState(Array(9).fill("").map(() => Array(9).fill("")));
+  const [finalgrid, setFinalGrid] = useState(Array(9).fill("").map(() => Array(9).fill("")));
+  return (
+    <div className = "all">
+    <Board grid = {grid} setGrid = {(value) => setGrid(value)}/>
+    <button className = "button"> Solve </button>
+    <Board grid = {finalgrid} setGrid = {(value) => setFinalGrid(value)}/>
     </div>
   );
 }
