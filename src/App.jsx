@@ -24,10 +24,10 @@ function Board({grid, setGrid}) {
       const { r, c } = selected;
 
       // 1. Handle Navigation (Arrow Keys)
-      if (event.key === 'ArrowUp')    setSelected({ r: Math.max(0, r - 1), c });
-      if (event.key === 'ArrowDown')  setSelected({ r: Math.min(8, r + 1), c });
-      if (event.key === 'ArrowLeft')  setSelected({ r, c: Math.max(0, c - 1) });
-      if (event.key === 'ArrowRight') setSelected({ r, c: Math.min(8, c + 1) });
+      if (event.key === 'k' || event.key === 'ArrowUp')    setSelected({ r: (((r-1)%9)+9)%9, c });
+      if (event.key === 'j' || event.key === 'ArrowDown')  setSelected({ r: (((r+1)%9)+9)%9, c });
+      if (event.key === 'h' || event.key === 'ArrowLeft')  setSelected({ r, c:  (((c-1)%9)+9)%9 });
+      if (event.key === 'l' || event.key === 'ArrowRight') setSelected({ r, c: (((c+1)%9)+9)%9 });
 
       // 2. Handle Data Entry (Numbers 1-9)
       if (event.key >= 1 && event.key <= 9) {
@@ -89,6 +89,11 @@ function Board({grid, setGrid}) {
 export default function All() {
   const [grid, setGrid] = useState(Array(9).fill("").map(() => Array(9).fill("")));
   const [finalgrid, setFinalGrid] = useState(Array(9).fill("").map(() => Array(9).fill("")));
+  function numinRow(grid, num, row) {
+    for (let col = 0; col < 9; col++){
+      
+    }
+  }
   return (
     <div className = "all">
     <Board grid = {grid} setGrid = {(value) => setGrid(value)}/>
