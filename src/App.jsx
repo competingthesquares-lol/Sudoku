@@ -21,6 +21,7 @@ function Board({grid, setGrid}) {
   
   useEffect(() => {
     const handleKeyDown = (event) => {
+      if (!selected) {return ;}
       const { r, c } = selected;
 
       // 1. Handle Navigation (Arrow Keys)
@@ -89,15 +90,70 @@ function Board({grid, setGrid}) {
 export default function All() {
   const [grid, setGrid] = useState(Array(9).fill("").map(() => Array(9).fill("")));
   const [finalgrid, setFinalGrid] = useState(Array(9).fill("").map(() => Array(9).fill("")));
+  
   function numinRow(grid, num, row) {
     for (let col = 0; col < 9; col++){
-          
+      if (grid[row][col] == num) {
+          return true;
+        }
+    }
+    return false;
+  }
+  function numinCol(grid, num, col) {
+    for (let row = 0; row < 9; row++){
+      if (grid[row][col] == num) {
+          return true;
+        }
+    }
+    return false;
+  }
+  function numinBox(grid, num, row, col) {
+    const locrow = row - (row % 3);
+    const loccol = col - (col % 3);
+    for (let i = locrow; i < locrow+3; i++){
+      for (let j = loccol; j < loccol+3; j++){
+        if (grid[i][j] == num) {return true;}
+      }
+    }
+    return false;
+  }
+  function isValid(grid, num, row, col) {
+    return !(numinRow(grid, num, row) || numinCol(grid, num, col) || numinBox(grid, num, row, col));
+  }
+  function solveBoard(grid) {
+    for (let row = 0; row < 9; row++){
+      for (let col = 0; col < 9; col++){
+        if (grid[row][col] === "") {
+          for (let tried = 1; tried <= 9; tried++) {
+            const stried = tried.toString();
+            if (isValid(grid, stried, row, col)) {
+              grid[row][col] = stried;
+              if (solveBoard(grid)) {
+                return true;
+              }
+              else {
+                grid[row][col] = "";
+              }
+            }
+          }
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  function solveGrid(grid) {
+    const newGrid = structuredClone(grid);
+    if (solveBoard(newGrid)){
+      setFinalGrid(newGrid);
+    } else {
+      console.log("No solution");
     }
   }
   return (
     <div className = "all">
     <Board grid = {grid} setGrid = {(value) => setGrid(value)}/>
-    <button className = "button"> Solve </button>
+    <button className = "button" onClick = {() => solveGrid(grid)}> Solve </button>
     <Board grid = {finalgrid} setGrid = {(value) => setFinalGrid(value)}/>
     </div>
   );
