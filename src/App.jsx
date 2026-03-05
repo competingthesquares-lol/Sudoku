@@ -91,7 +91,7 @@ export default function All() {
   const [finalgrid, setFinalGrid] = useState(Array(9).fill("").map(() => Array(9).fill("")));
   function numinRow(grid, num, row) {
     for (let col = 0; col < 9; col++){
-      
+          
     }
   }
   return (
